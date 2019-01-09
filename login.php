@@ -2,8 +2,19 @@
 session_start();
 ini_set('session.gc.maxlifetime', 3600);
 
+if( $_SESSION['login'] && $_SESSION['pass']){
+  header("Location: content.php");
+  die();
+}
+
+
+
 $connection = new PDO('mysql:host=jktu.ru; dbname=selto149_php; charset=utf8', 'selto149_php', 'AcademyPHP2@');
 $login = $connection->query('select * from `login`;');
+
+
+
+
 
 if( $_POST['login']){
   foreach ( $login as $log){
