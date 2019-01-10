@@ -29,39 +29,29 @@ if( $_POST['login']){
 
 
 
-if( $_POST['newlogin']){
-  if( $_POST['newpass'] != $_POST['verify-newpass'] ){
+if( $_POST['newlogin']) {
+  if ($_POST['newpass'] != $_POST['verify-newpass']) {
     echo "Пароли не совпадают";
 
-  }else {
+  } else {
     $connection = new PDO('mysql:host=jktu.ru; dbname=selto149_php; charset=utf8', 'selto149_php', 'AcademyPHP2@');
     $newlogin = $_POST['newlogin'];
-    $login = $connection->query('select * from `login` where user=$newlogin;');
+
+    $login = $connection->prepare('select * from `login` where user=:newlogin;');
+    $login->execute(array(':newlogin' => $newlogin));
+
+    if ($login->rowCount()) {
+      echo "Такой пользователь уже есть";
+    } else {
+      $login = $connection->prepare("insert into `login` (`user`, `pass`) values (:user, :pass);");
+      if ($login->execute(array(':user' => $newlogin, ':pass' => $_POST['newpass']))) echo "Создан";
+      else {echo 'Error '. $login->errorCode(); var_dump( $login->errorInfo());}
 
 
-
-  }
-
-
-  foreach ( $login as $log){
-    if($_POST['login']== $log['user']  && $_POST['pass']== $log['pass']){
-      $_SESSION['login'] = $_POST['login'];
-      $_SESSION['pass'] = $_POST['pass'];
-      $_SESSION['bgcolor'] = $_POST['bg'];
-      setcookie('bg', $_POST['bg'], time()+3600);
-      header('Location: content.php');
-      die();
     }
+
   }
-  echo "Неверный логин или пароль";
 }
-
-
-
-
-
-
-
 ?>
   <style>
     body  {
