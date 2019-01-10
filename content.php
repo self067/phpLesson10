@@ -1,20 +1,27 @@
 <?php
+session_start();
 
-//session_start();
+//var_dump($_SESSION);
+//echo '<br>';
+//var_dump($_POST);
+
 
 if( !$_SESSION['login'] || !$_SESSION['pass']){
   header("Location: login.php");
   die();
 }
-if(  isset( $_POST['logout'])){
-  session_destroy();
+
+
+if( $_POST['logout']) {
+//  session_destroy();
+  $_SESSION = array();
+  session_write_close();
   header('Location: login.php');
 }
 
-//setcookie('bg', $_POST['bg'], time()+120);
 $bg = $_SESSION['bgcolor'];
 
-//echo "<body bgcolor=#$bg>";
+echo "<body bgcolor=$bg>";
 
 ?>
 
