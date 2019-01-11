@@ -13,9 +13,9 @@ if( $_POST['login']){
   $connection = new PDO('mysql:host=jktu.ru; dbname=selto149_php; charset=utf8', 'selto149_php', 'AcademyPHP2@');
   $login = $connection->query('select * from `login`;');
   foreach ( $login as $log){
-    if($_POST['login']== $log['user']  && $_POST['pass']== $log['pass']){
+    if($_POST['login']== $log['user']  && md5($_POST['pass']) == $log['pass']){
       $_SESSION['login'] = $_POST['login'];
-      $_SESSION['pass'] = $_POST['pass'];
+      $_SESSION['pass'] = md5($_POST['pass']);
       $_SESSION['bgcolor'] = $_POST['bg'];
       setcookie('bg', $_POST['bg'], time()+3600);
       header('Location: content.php');
@@ -43,7 +43,7 @@ if( $_POST['newlogin']) {
         $_SESSION['confirmcode'] = $confirmcode;
         $_SESSION['newlogin'] = $newlogin;
         $_SESSION['email'] = $email;
-        $_SESSION['newpass'] = $_POST['newpass'];
+        $_SESSION['newpass'] = md5($_POST['newpass']);
 
 //        message( $confirmcode);
         if( sendConfirm($confirmcode)) message( "На адрес $email отправлен код подтверждения");
