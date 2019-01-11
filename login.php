@@ -124,14 +124,6 @@ function message(string $mes){
         <input type="email" name="email" required placeholder="e-mail"><br>
         <input type="password" name="newpass" required placeholder="Пароль"><br>
         <input type="password" name="verify-newpass" required placeholder="Повторите пароль"><br>
-        <!--      <span>Цвет фона</span>-->
-        <!--      <select>-->
-        <!--          <option>Желтый</option>-->
-        <!--          <option>Зеленый</option>-->
-        <!--          <option>Голубой</option>-->
-        <!--      </select>-->
-
-<!--        <p>Укажите цвет фона: <input type="color" name="bg" value="#ff0000"></p>-->
         <input type="submit" value="Регистрация">
    </form>
 
