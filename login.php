@@ -84,18 +84,18 @@ function message(string $mes){
       margin: 100px 200px;
     }
     input, p, select, span {
-      font-size: 30px;
+      font-size: 20px;
       margin: 10px;
     }
     .regform {
-        margin-top: 40px;
+        margin-top: 30px;
     }
     .confirmform{
 
     }
 
       .message {
-          font-size: 26px;
+          font-size: 20px;
           color: #ff246c;
       }
 
