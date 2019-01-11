@@ -2,14 +2,12 @@
 session_start();
 ini_set('session.gc.maxlifetime', 3600);
 
-//var_dump($_SESSION);
+require 'send.php';
 
 if( $_SESSION['login'] && $_SESSION['pass'] ){
   header("Location: content.php");
   die();
 }
-
-//var_dump($_POST);
 
 if( $_POST['login']){
   $connection = new PDO('mysql:host=jktu.ru; dbname=selto149_php; charset=utf8', 'selto149_php', 'AcademyPHP2@');
@@ -24,34 +22,62 @@ if( $_POST['login']){
       die();
     }
   }
-  echo "Неверный логин или пароль";
+  message("Неверный логин или пароль");
 }
-
-
 
 if( $_POST['newlogin']) {
   if ($_POST['newpass'] != $_POST['verify-newpass']) {
-    echo "Пароли не совпадают";
+    message( "Пароли не совпадают");
 
   } else {
     $connection = new PDO('mysql:host=jktu.ru; dbname=selto149_php; charset=utf8', 'selto149_php', 'AcademyPHP2@');
     $newlogin = $_POST['newlogin'];
-
-    $login = $connection->prepare('select * from `login` where user=:newlogin;');
-    $login->execute(array(':newlogin' => $newlogin));
+    $email = $_POST['email'];
+    $login = $connection->prepare('select user from `login` where user=:newlogin or email=:email;');
+    $login->execute(array(':newlogin' => $newlogin,':email' => $email ));
 
     if ($login->rowCount()) {
-      echo "Такой пользователь уже есть";
+      message( "Такой пользователь или e-mail уже есть");
     } else {
-      $login = $connection->prepare("insert into `login` (`user`, `pass`) values (:user, :pass);");
-      if ($login->execute(array(':user' => $newlogin, ':pass' => $_POST['newpass']))) echo "Создан";
-      else {echo 'Error '. $login->errorCode(); var_dump( $login->errorInfo());}
+        $confirmcode = ''. rand(0,9).rand(0,9).rand(0,9).rand(0,9);
+        $_SESSION['confirmcode'] = $confirmcode;
+        $_SESSION['newlogin'] = $newlogin;
+        $_SESSION['email'] = $email;
+        $_SESSION['newpass'] = $_POST['newpass'];
 
-
+//        message( $confirmcode);
+        if( sendConfirm($confirmcode)) message( "На адрес $email отправлен код подтверждения");
+        else message("Ошибка отправки кода подтверждения на адрес $email");
     }
-
   }
 }
+
+if( $_POST['confirmcode']) {
+  $cc = $_POST['confirmcode'];
+  if($_SESSION['confirmcode']) $confirmcode = $_SESSION['confirmcode'];
+  if( $cc != $confirmcode) message("Неверный код подтверждения"); //  $cc != $confirmcode" );
+  else {
+    $connection = new PDO('mysql:host=jktu.ru; dbname=selto149_php; charset=utf8', 'selto149_php', 'AcademyPHP2@');
+    $login = $connection->prepare("insert into `login` (`user`, `pass`, `email`) values (:user, :pass, :email);");
+      if ($login->execute(array(':user' => $_SESSION['newlogin'],
+                                ':pass' => $_SESSION['newpass'],
+                                ':email' => $_SESSION['email']))) message('Учетная запись создана');
+      else {message( 'Error '. $login->errorCode()); var_dump( $login->errorInfo());}
+
+    unset($_SESSION['confirmcode']);
+  }
+}
+
+$connection = null;
+$login = null;
+
+function message(string $mes){
+    echo "<div class='message'>$mes</div>";
+}
+
+
+
+
 ?>
   <style>
     body  {
@@ -64,6 +90,14 @@ if( $_POST['newlogin']) {
     .regform {
         margin-top: 40px;
     }
+    .confirmform{
+
+    }
+
+      .message {
+          font-size: 26px;
+          color: #ff246c;
+      }
 
   </style>
 
@@ -87,6 +121,7 @@ if( $_POST['newlogin']) {
     <form class="regform" method="POST">
         <p>Зарегистрироваться</p>
         <input type="text" name="newlogin" required placeholder="Логин"><br>
+        <input type="email" name="email" required placeholder="e-mail"><br>
         <input type="password" name="newpass" required placeholder="Пароль"><br>
         <input type="password" name="verify-newpass" required placeholder="Повторите пароль"><br>
         <!--      <span>Цвет фона</span>-->
@@ -100,6 +135,11 @@ if( $_POST['newlogin']) {
         <input type="submit" value="Регистрация">
    </form>
 
+    <form class="confirmform" method="POST">
+        <p>Ввести код подтверждения</p>
+        <input type="text" name="confirmcode" required placeholder="Код"><br>
+        <input type="submit" value="Подтвердить регистрацию">
+    </form>
 
 
 <?php
